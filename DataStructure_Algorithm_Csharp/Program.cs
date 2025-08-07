@@ -8,13 +8,34 @@ namespace DataStructure_Algorithm_Csharp
         {
             var avlTree = new AVLTree();
 
-            avlTree.Add(5);
-            avlTree.Add(2);
-            avlTree.Add(1);
-            avlTree.Add(3);
+            //avlTree.Add(5);
+            //avlTree.Add(2);
+            //avlTree.Add(1);
+            //avlTree.Add(3);
+            //avlTree.Add(7);
+            //avlTree.Add(6);
+            //avlTree.Add(8);
+            //avlTree.Add(9);
+            //avlTree.Add(10);
+            //avlTree.Add(0);
+            //avlTree.Add(-1);
+            //avlTree.Add(-2);
+
+
+
+
+            avlTree.Add(10);
+            avlTree.Add(9);
+            avlTree.Add(8);
             avlTree.Add(7);
             avlTree.Add(6);
-            //avlTree.Add(8);
+            avlTree.Add(5);
+            avlTree.Add(3);
+            avlTree.Add(2);
+            avlTree.Add(1);
+            avlTree.Add(0);
+            avlTree.Add(-1);
+            avlTree.Add(-2);
 
             var root = avlTree.GetRoot();
             Console.WriteLine("Hello, World!");

@@ -11,7 +11,8 @@ namespace DataStructure_Algorithm_Csharp.Tree
     public class AVLTree
     {
         private Node? _root;
-        private int _count = 0;
+        public int _count = 0;
+        public int _maxHeigth = 0;
         public void Add(int value)
         {
             var newNode = new Node
@@ -27,13 +28,15 @@ namespace DataStructure_Algorithm_Csharp.Tree
             if (_root == null)
             {
                 _root = newNode;
+                _maxHeigth++;
                 return;
             }
 
             var currentNode = _root;
-            while (newNode.Parrent == null && currentNode != null)
+            int currentHeigth = 0;
+            while (newNode.Parrent == null)
             {
-
+                currentHeigth++;
                 if (newNode.Value > currentNode.Value)
                 {
                     if (currentNode.Right == null)
@@ -41,6 +44,10 @@ namespace DataStructure_Algorithm_Csharp.Tree
                         // insert to the right of the current node
                         currentNode.Right = newNode;
                         newNode.Parrent = currentNode;
+                        if (currentHeigth + 1 > _maxHeigth)
+                        {
+                            _maxHeigth++;
+                        }
                         this.UpdateWeightBackTracking(newNode);
                     }
                     else
@@ -56,6 +63,10 @@ namespace DataStructure_Algorithm_Csharp.Tree
                         // insert to the left of the current node
                         currentNode.Left = newNode;
                         newNode.Parrent = currentNode;
+                        if (currentHeigth + 1 > _maxHeigth)
+                        {
+                            _maxHeigth++;
+                        }
                         this.UpdateWeightBackTracking(newNode);
                     }
                     else
@@ -69,45 +80,88 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
         private void UpdateWeightBackTracking(Node leaf)
         {
-            var currentNode = leaf;
-            //bool isLeft = currentNode?.Parrent?.Left?.Id == currentNode.Id;
-            //bool isRight = currentNode?.Parrent?.Right?.Id == currentNode.Id;
-            //if (isLeft)
-            //{
-                while (currentNode != null)
-                {
-                    bool isLeft = currentNode?.Parrent?.Left?.Id == currentNode.Id;
-                    bool isRight = currentNode?.Parrent?.Right?.Id == currentNode.Id;
-                if (currentNode.Parrent.weight > 0)
-                    {
-                        currentNode.Parrent.weight--;
-                        break;
-                    }
-                    if (currentNode.Parrent.weight < 0)
-                    {
-                        currentNode.Parrent.weight++;
-                        break;
-                }
-                    currentNode.Parrent.weight--;
-                    currentNode = currentNode?.Parrent;
-                    isLeft = currentNode?.Parrent?.Left?.Id == currentNode.Id;
-                }
-            //}
-            //if (isRight)
-            //{
-            //    while (currentNode != null && isRight)
-            //    {
-            //        if (currentNode.Parrent.weight < 0)
-            //        {
-            //            currentNode.Parrent.weight++;
-            //            break;
-            //        }
-            //        currentNode.Parrent.weight++;
-            //        currentNode = currentNode?.Parrent;
-            //        isRight = currentNode?.Parrent?.Right?.Id == currentNode.Id;
-            //    }
-            //}
+            Node currentNode = leaf;
 
+            while (currentNode?.Parrent != null)
+            {
+                bool isLeft = currentNode?.Parrent?.Left?.Id == currentNode.Id;
+                int oldwWeigth = Math.Abs(currentNode.Parrent.weight);
+
+                if (isLeft)
+                {
+                    currentNode.Parrent.weight--;
+                }
+                else
+                {
+                    currentNode.Parrent.weight++;
+                }
+
+                if (currentNode.Parrent.weight >= 2)
+                {
+                    this.RotateLeft(currentNode.Parrent, currentNode);
+                    break;
+                }
+
+                if (currentNode.Parrent.weight <= -2)
+                {
+                    this.RotateRight(currentNode.Parrent, currentNode);
+                    break;
+                }
+
+                if (Math.Abs(currentNode.Parrent.weight) < oldwWeigth)
+                {
+                    break;
+                }
+
+                currentNode = currentNode.Parrent;
+            }
+        }
+
+
+        private void RotateRight(Node root, Node pivot)
+        {
+
+            pivot.weight++;
+            root.weight++;
+            if (pivot.Right != null)
+            {
+                root.Left = pivot.Right;
+                pivot.Right.Parrent = root;
+            }
+            pivot.Parrent = root.Parrent;
+            if (root.Parrent != null)
+            {
+                root.Parrent.Left = pivot;
+            }
+            pivot.Right = root;
+            if (root.Id == _root.Id)
+            {
+                _root = pivot;
+            }
+        }
+        private void RotateLeft(Node root, Node pivot)
+        {
+
+
+            pivot.weight--;
+            root.weight--;
+            if (pivot.Left != null)
+            {
+                root.Right = pivot.Left;
+                pivot.Left.Parrent = root;
+
+            }
+            pivot.Parrent = root.Parrent;
+            if (root.Parrent != null)
+            {
+                root.Parrent.Right = pivot;
+            }
+            pivot.Left = root;
+
+            if (root.Id == _root.Id)
+            {
+                _root = pivot;
+            }
         }
 
         public Node? GetRoot()
@@ -120,7 +174,27 @@ namespace DataStructure_Algorithm_Csharp.Tree
             return _count;
         }
 
+        public bool Any(int value)
+        {
+            var currentNode = _root;
+            while (currentNode != null)
+            {
+                if (currentNode.Value == value)
+                {
+                    return true;
+                }
+                if (value > currentNode.Value)
+                {
+                   currentNode = currentNode.Right;                    
+                }
+                else
+                {
+                    currentNode = currentNode.Left;
+                }
+            }
 
+            return false;
+        }
 
         public class Node
         {
