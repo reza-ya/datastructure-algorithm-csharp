@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -8,11 +9,91 @@ using System.Threading.Tasks;
 
 namespace DataStructure_Algorithm_Csharp.Tree
 {
+
+
+
+
+
+
+    public class AVLTree<T>
+    {
+        private Node<T>? _root;
+        public int _count = 0;
+        public int _maxHeigth = 0;
+        public Func<T, int> _selectValue;
+
+        public T test;
+
+        public AVLTree(Func<T, int> selectValue)
+        {
+            _selectValue = selectValue;
+        }
+        public void Add(T value)
+        {
+            test = value;
+        }
+
+        public void PrintValue()
+        {
+            var getAge = _selectValue(test);
+        }
+        public int Count()
+        {
+            return _count;
+        }
+        public bool Any(int value)
+        {
+            return false;
+        }
+
+        public Node<T>? GetRoot()
+        {
+            return _root;
+        }
+        private void UpdateWeightBackTracking(Node<T> leaf)
+        {
+           
+        }
+        private void RotateRight(Node<T> root, Node<T> pivot)
+        {
+            
+        }
+        private void RotateLeft(Node<T> root, Node<T> pivot)
+        {
+
+        }
+        public class Node<T>
+        {
+            public int Weight { get; set; }
+            public int Value { get; set; }
+            public Node<T>? Left { get; set; }
+            public Node<T>? Right { get; set; }
+            public T Data { get; init; }
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
     public class AVLTree
     {
         private Node? _root;
         public int _count = 0;
         public int _maxHeigth = 0;
+
+
+
+
+
+
         public void Add(int value)
         {
             var newNode = new Node
@@ -77,7 +158,47 @@ namespace DataStructure_Algorithm_Csharp.Tree
             }
 
         }
+        public int Count()
+        {
+            return _count;
+        }
+        public bool Any(int value)
+        {
+            var currentNode = _root;
+            while (currentNode != null)
+            {
+                if (currentNode.Value == value)
+                {
+                    return true;
+                }
+                if (value > currentNode.Value)
+                {
+                   currentNode = currentNode.Right;                    
+                }
+                else
+                {
+                    currentNode = currentNode.Left;
+                }
+            }
 
+            return false;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        public Node? GetRoot()
+        {
+            return _root;
+        }
         private void UpdateWeightBackTracking(Node leaf)
         {
             Node currentNode = leaf;
@@ -116,8 +237,6 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 currentNode = currentNode.Parrent;
             }
         }
-
-
         private void RotateRight(Node root, Node pivot)
         {
 
@@ -163,39 +282,6 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 _root = pivot;
             }
         }
-
-        public Node? GetRoot()
-        {
-            return _root;
-        }
-
-        public int Count()
-        {
-            return _count;
-        }
-
-        public bool Any(int value)
-        {
-            var currentNode = _root;
-            while (currentNode != null)
-            {
-                if (currentNode.Value == value)
-                {
-                    return true;
-                }
-                if (value > currentNode.Value)
-                {
-                   currentNode = currentNode.Right;                    
-                }
-                else
-                {
-                    currentNode = currentNode.Left;
-                }
-            }
-
-            return false;
-        }
-
         public class Node
         {
             public int Id { get; init; }
@@ -204,6 +290,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
             public Node? Left;
             public Node? Right;
             public Node? Parrent;
+
         }
     }
 }
