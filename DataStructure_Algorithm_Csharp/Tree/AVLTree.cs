@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -20,22 +22,55 @@ namespace DataStructure_Algorithm_Csharp.Tree
         private Node<T>? _root;
         public int _count = 0;
         public int _maxHeigth = 0;
-        public Func<T, int> _selectValue;
-
-        public T test;
-
-        public AVLTree(Func<T, int> selectValue)
+        public Expression<Func<T, object>> _index;
+        private readonly Func<T, object> _compiledSelector;
+        private 
+        public AVLTree(Expression<Func<T, object>> index)
         {
-            _selectValue = selectValue;
+            _index = index;
+            _compiledSelector = CreateSelector();
+            //_compiledSelector = index.Compile();
         }
         public void Add(T value)
         {
-            test = value;
+            
+        }
+
+        private Func<T, object> CreateSelector()
+        {
+            Expression body = _index.Body;
+
+            // Handle value types (boxed to object)
+            if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
+                body = unary.Operand;
+
+            if (body is MemberExpression member)
+            {
+                if (member.Type.Name != typeof(int).Name && member.Type.Name != typeof(long).Name)
+                {
+                    throw new InvalidOperationException("Just integer or long value can be indexed");
+                }
+
+                if (member.Type.Name == typeof(int).Name)
+                {
+                    var param = _index.Parameters[0];
+                    var lambda = Expression.Lambda<Func<T, int>>(member, param);
+                }
+                else
+                {
+                    var param = _index.Parameters[0];
+                    var lambda = Expression.Lambda<Func<T, long>>(member, param);
+
+                }
+                    return member.Member.Name;
+            }
+
+            throw new InvalidOperationException("Expression does not select a property.");
         }
 
         public void PrintValue()
         {
-            var getAge = _selectValue(test);
+
         }
         public int Count()
         {
