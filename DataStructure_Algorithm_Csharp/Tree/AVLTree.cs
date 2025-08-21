@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
@@ -19,71 +20,56 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
     public class AVLTree<T>
     {
-        private Node<T>? _root;
+        public Node<T>? _root;
         public int _count = 0;
         public int _maxHeigth = 0;
-        public Expression<Func<T, object>> _index;
-        private readonly Func<T, object> _compiledSelector;
-        private 
-        public AVLTree(Expression<Func<T, object>> index)
+        public Func<T, int> _selector;
+        public AVLTree(Func<T, int> selector)
         {
-            _index = index;
-            _compiledSelector = CreateSelector();
-            //_compiledSelector = index.Compile();
+            _selector = selector;
         }
-        public void Add(T value)
+        public void Add(T data)
         {
-            
-        }
-
-        private Func<T, object> CreateSelector()
-        {
-            Expression body = _index.Body;
-
-            // Handle value types (boxed to object)
-            if (body is UnaryExpression unary && unary.NodeType == ExpressionType.Convert)
-                body = unary.Operand;
-
-            if (body is MemberExpression member)
+            _count++;
+            if (_root == null)
             {
-                if (member.Type.Name != typeof(int).Name && member.Type.Name != typeof(long).Name)
-                {
-                    throw new InvalidOperationException("Just integer or long value can be indexed");
-                }
+                var newNode = new Node<T>(data, _selector(data), 0);
+                _root = newNode;
+                return;
+            }
 
-                if (member.Type.Name == typeof(int).Name)
+
+            InsertNode(_root, data);
+        }
+
+        public List<T>? Find(int value)
+        {
+            if (_root == null)
+            {
+                return null;
+            }
+            var currentNode = _root;
+            while(currentNode != null && currentNode.Value != value)
+            {
+                if (value > currentNode.Value)
                 {
-                    var param = _index.Parameters[0];
-                    var lambda = Expression.Lambda<Func<T, int>>(member, param);
+                    currentNode = currentNode.Right;
                 }
                 else
                 {
-                    var param = _index.Parameters[0];
-                    var lambda = Expression.Lambda<Func<T, long>>(member, param);
-
+                    currentNode = currentNode.Left;
                 }
-                    return member.Member.Name;
             }
-
-            throw new InvalidOperationException("Expression does not select a property.");
-        }
-
-        public void PrintValue()
-        {
-
+            if (currentNode == null)
+            {
+                return null;
+            }
+            return currentNode.Data;
+            
         }
         public int Count()
         {
             return _count;
-        }
-        public bool Any(int value)
-        {
-            return false;
-        }
-
-        public Node<T>? GetRoot()
-        {
-            return _root;
         }
         private void UpdateWeightBackTracking(Node<T> leaf)
         {
@@ -91,21 +77,196 @@ namespace DataStructure_Algorithm_Csharp.Tree
         }
         private void RotateRight(Node<T> root, Node<T> pivot)
         {
-            
+
+            var pivotChild = pivot.Right;
+            pivot.Right = root;
+            root.Left = pivotChild;
         }
         private void RotateLeft(Node<T> root, Node<T> pivot)
         {
-
+            var pivotChild = pivot.Left;
+            pivot.Left = root;
+            root.Right = pivotChild;
         }
-        public class Node<T>
+        
+        private bool RotateIfNeeded(Node<T> parrentRoot)
         {
-            public int Weight { get; set; }
-            public int Value { get; set; }
-            public Node<T>? Left { get; set; }
-            public Node<T>? Right { get; set; }
-            public T Data { get; init; }
+            bool isRotate = false;
+            if (parrentRoot == null)
+            {
+                return false;
+            }
+
+            if (parrentRoot?.Right?.Weight == 2)
+            {
+                var root = parrentRoot.Right;
+                if (root.Right == null) throw new InvalidOperationException("weight 2 has no right!");
+                if (root.Right.Weight == 1)
+                {
+                    var pivot = root.Right;
+                    parrentRoot.Right = pivot;
+                    RotateLeft(root, pivot);
+                }
+                else
+                {
+                    var firstRoot = root.Right;
+                    var firstPivot = root.Right.Left;
+                    root.Right = root.Right.Left;
+                    RotateRight(firstRoot, firstPivot);
+
+                    RotateLeft(root, firstPivot);
+
+                    //Double rotation
+                }
+                isRotate = true;
+            }
+            else if (parrentRoot?.Left?.Weight == 2)
+            {
+                var root = parrentRoot.Left;
+                if (root.Right == null) throw new InvalidOperationException("weight 2 has no right!");
+                if (root.Right.Weight == 1)
+                {
+                    var pivot = root.Right;
+                    parrentRoot.Left = pivot;
+                    RotateLeft(root, pivot);
+                }
+                else
+                {
+                    //Double rotation
+                }
+                isRotate = true;
+            }
+            else if (parrentRoot?.Right?.Weight == -2)
+            {
+                var root = parrentRoot.Right;
+                if (root.Left == null) throw new InvalidOperationException("weight 2 has no right!");
+                if (root.Left.Weight == -1)
+                {
+                    var pivot = root.Left;
+                    parrentRoot.Right = pivot;
+                    RotateRight(root, pivot);
+                }
+                else
+                {
+                    // double rotation
+                }
+                return true;
+            }
+            else if (parrentRoot?.Left?.Weight == -2)
+            {
+
+                var root = parrentRoot.Left;
+                if (root.Left == null) throw new InvalidOperationException("weight 2 has no right!");
+                if (root.Left.Weight == -1)
+                {
+                    var pivot = root.Left;
+                    parrentRoot.Left = pivot;
+                    RotateRight(root, pivot);
+                }
+                else
+                {
+                    //Double rotation
+                }
+
+                isRotate = true;
+            }
+
+            return isRotate;
+        }
+        private bool InsertNode(Node<T> root, T data)
+        {
+            if (RotateIfNeeded(root))
+            {
+                return false;
+            }
+
+            var newNodeValue = _selector(data);
+            bool continueToUpdate = true;
+            int insertDirection = 0;
+            if (root.Value == newNodeValue)
+            {
+                insertDirection = 0;
+                root.Data.Add(data);
+                return false;
+            }
+
+            if (newNodeValue > root.Value) {
+                insertDirection = 1;
+                if (root.Right == null)
+                {
+                    root.Right = new Node<T>(data, newNodeValue, 0);
+                }
+                else
+                {
+                    continueToUpdate = InsertNode(root.Right, data);
+                }
+            }
+
+
+            if (newNodeValue < root.Value)
+            {
+                insertDirection = -1;
+                if (root.Left == null)
+                {
+                    root.Left = new Node<T>(data, newNodeValue, 0);
+                }
+                else
+                {
+                    continueToUpdate = InsertNode(root.Left, data);
+                }
+            }
+            if (continueToUpdate == false)
+            {
+                return continueToUpdate;
+            }
+            // coming from right
+            if (insertDirection > 0)
+            {
+                if (root.Weight >= 0)
+                {
+                    root.Weight++;
+                }
+                else
+                {
+                    root.Weight++;
+                    continueToUpdate = false; // stop updating weight
+                }
+            }
+            // coming from left
+            if (insertDirection < 0)
+            {
+                if (root.Weight <= 0)
+                {
+                    root.Weight--;
+                }
+                else
+                {
+                    root.Weight--;
+                    continueToUpdate = false; // stop updating weight
+                }
+            }
+
+           
+            return continueToUpdate;
 
         }
+        public class Node<NT>
+        {
+            public Node(NT data, int value ,int weight, Node<NT>? left = null, Node<NT>? right = null)
+            {
+                Weight = weight;
+                Left = left;
+                Right = right;
+                Data.Add(data);
+                Value = value;
+            }
+            public int Weight { get; set; }
+            public Node<NT>? Left { get; set; }
+            public Node<NT>? Right { get; set; }
+            public int Value { get; set; }
+            public List<NT> Data { get; init; } = new();
+        }
+
     }
 
 

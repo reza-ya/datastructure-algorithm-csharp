@@ -1,5 +1,7 @@
 ﻿using DataStructure_Algorithm_Csharp.Storage;
 using DataStructure_Algorithm_Csharp.Tree;
+
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
 
@@ -7,57 +9,51 @@ namespace DataStructure_Algorithm_Csharp
 {
     internal class Program
     {
-
-        public class Person
-        {
-            public int Id { get; set; }
-            public required string FullName { get; set; }
-            public int Age { get; set; }
-
-        }
         static void Main(string[] args)
         {
 
-
-
-            //var table = new Table<Person>();
             var avlTree = new AVLTree<Person>(person => person.Age);
 
-            var person = new Person() { Id = 1 , FullName ="reza" , Age = 12 };
-            avlTree.Add(person);
+            avlTree.Add(new Person(10));
+            avlTree.Add(new Person(5));
+            avlTree.Add(new Person(5));
+            avlTree.Add(new Person(5));
+            avlTree.Add(new Person(5));
+            avlTree.Add(new Person(3));
+            avlTree.Add(new Person(7));
+            avlTree.Add(new Person(15));
+            avlTree.Add(new Person(12));
+            avlTree.Add(new Person(20));
+            avlTree.Add(new Person(19));
+            avlTree.Add(new Person(11));
+            avlTree.Add(new Person(13));
+            avlTree.Add(new Person(9));
             avlTree.PrintValue();
 
-            //avlTree.Add(5);
-            //avlTree.Add(2);
-            //avlTree.Add(1);
-            //avlTree.Add(3);
-            //avlTree.Add(7);
-            //avlTree.Add(6);
-            //avlTree.Add(8);
-            //avlTree.Add(9);
-            //avlTree.Add(10);
-            //avlTree.Add(0);
-            //avlTree.Add(-1);
-            //avlTree.Add(-2);
-
-
-
-
-            //avlTree.Add(10);
-            //avlTree.Add(9);
-            //avlTree.Add(8);
-            //avlTree.Add(7);
-            //avlTree.Add(6);
-            //avlTree.Add(5);
-            //avlTree.Add(3);
-            //avlTree.Add(2);
-            //avlTree.Add(1);
-            //avlTree.Add(0);
-            //avlTree.Add(-1);
-            //avlTree.Add(-2);
-
-            //var root = avlTree.GetRoot();
+            var findAge = 34;
+            var persons = avlTree.Find(findAge);
+            if (persons == null)
+            {
+                Console.WriteLine("Nothing Found!");
+            }
+            else
+            {
+                Console.WriteLine($"Found {persons.Count} person with the age {findAge}");
+            }
             Console.WriteLine("Hello, World!");
+        }
+        public class Person
+        {
+            public Person(int age)
+            {
+                Age = age;
+                Id = 1;
+                FullName = "Reza Yari";
+            }
+            public int Id { get; set; }
+            public string FullName { get; set; }
+            public int Age { get; set; }
+
         }
     }
 }
