@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -75,15 +76,81 @@ namespace DataStructure_Algorithm_Csharp.Tree
         {
            
         }
+        /// <summary>
+        /// do a tree rotation and updates it's weight accordingly 
+        /// update of root parrent must be done outside this function!
+        /// rotate-right operation must happen only if root and pivot weights are both been negetive
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="pivot"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         private void RotateRight(Node<T> root, Node<T> pivot)
         {
-
+            var oldPivot = pivot.Weight;
+            var oldRoot = root.Weight;
+            // update root weight
+            if (oldPivot >= 0)
+            {
+                root.Weight++;
+            }
+            else if (oldPivot < 0)
+            {
+                root.Weight = root.Weight + oldPivot + 1;
+            }
+            // rotate-right operation must happen only if root and pivot weights are both been negetive
+            // otherwise this logic of updating weight doesn't work!
+            // update pivot weight
+            if (oldPivot <= 0 && oldRoot < 0)
+            {
+                if (oldPivot> oldRoot + 1)
+                {
+                    pivot.Weight++;
+                }
+                else
+                {
+                    pivot.Weight = oldRoot + 2;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Rotate-right operation must happen only if root and pivot weights are both been negetive");
+            }
+            // rotate 
             var pivotChild = pivot.Right;
             pivot.Right = root;
             root.Left = pivotChild;
         }
         private void RotateLeft(Node<T> root, Node<T> pivot)
         {
+            var oldPivot = pivot.Weight;
+            var oldRoot = root.Weight;
+            // update root weight
+            if (oldPivot <= 0)
+            {
+                root.Weight--;
+            }
+            else if (oldPivot > 0)
+            {
+                root.Weight = root.Weight - oldPivot - 1;
+            }
+            // rotate-right operation must happen only if root and pivot weights are both been positive
+            // otherwise this logic of updating weight doesn't work!
+            // update pivot weight
+            if (oldPivot >= 0 && oldRoot > 0)
+            {
+                if (oldPivot > -oldRoot + 1)
+                {
+                    pivot.Weight--;
+                }
+                else
+                {
+                    pivot.Weight = -oldRoot + 2;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Rotate-left operation must happen only if root and pivot weights are both been positive");
+            }
             var pivotChild = pivot.Left;
             pivot.Left = root;
             root.Right = pivotChild;
@@ -113,10 +180,8 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     var firstPivot = root.Right.Left;
                     root.Right = root.Right.Left;
                     RotateRight(firstRoot, firstPivot);
-
-                    RotateLeft(root, firstPivot);
-
-                    //Double rotation
+                    parrentRoot.Right = root.Right;
+                    RotateLeft(root, root.Right);
                 }
                 isRotate = true;
             }
@@ -132,7 +197,12 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
                 else
                 {
-                    //Double rotation
+                    var firstRoot = root.Right;
+                    var firstPivot = root.Right.Left;
+                    root.Right = root.Right.Left;
+                    RotateRight(firstRoot, firstPivot);
+                    parrentRoot.Left = root.Right;
+                    RotateLeft(root, root.Right);
                 }
                 isRotate = true;
             }
@@ -148,7 +218,11 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
                 else
                 {
-                    // double rotation
+                    var firstRoot = root.Left;
+                    var firstPivot = root.Left.Right;
+                    RotateLeft(firstRoot, firstPivot);
+                    parrentRoot.Right = root.Left;
+                    RotateRight(root, root.Left);
                 }
                 return true;
             }
@@ -165,7 +239,11 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
                 else
                 {
-                    //Double rotation
+                    var firstRoot = root.Left;
+                    var firstPivot = root.Left.Right;
+                    RotateLeft(firstRoot, firstPivot);
+                    parrentRoot.Left = root.Left;
+                    RotateRight(root, root.Left);
                 }
 
                 isRotate = true;
@@ -175,10 +253,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
         }
         private bool InsertNode(Node<T> root, T data)
         {
-            if (RotateIfNeeded(root))
-            {
-                return false;
-            }
+
 
             var newNodeValue = _selector(data);
             bool continueToUpdate = true;
@@ -214,6 +289,13 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 {
                     continueToUpdate = InsertNode(root.Left, data);
                 }
+            }
+
+
+            bool isRotate = RotateIfNeeded(root);
+            if (isRotate)
+            {
+                return false;
             }
             if (continueToUpdate == false)
             {
