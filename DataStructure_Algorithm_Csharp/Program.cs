@@ -14,11 +14,9 @@ namespace DataStructure_Algorithm_Csharp
 
             var avlTree = new AVLTree<Person>(person => person.Age);
 
-            avlTree.Add(new Person(10));
-            avlTree.Add(new Person(5));
-            avlTree.Add(new Person(15));
-            avlTree.Add(new Person(20));
-            avlTree.Add(new Person(16));
+            avlTree.Add(new Person(1));
+            avlTree.Add(new Person(2));
+            avlTree.Add(new Person(3));
 
             var findAge = 34;
             var persons = avlTree.Find(findAge);

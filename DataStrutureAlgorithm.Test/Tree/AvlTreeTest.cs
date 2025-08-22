@@ -17,6 +17,31 @@ namespace DataStrutureAlgorithm.Test.Tree
 
         public static IEnumerable<object[]> GetTestData()
         {
+
+            //TODO: this is failed but test case does not show it? add node count to the test case
+            //consider adding the exact shape of the tree for testing 
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(1),
+                    new Person(2),
+                    new Person(3),
+                    new Person(4),
+                    new Person(5),
+                    new Person(6),
+                    new Person(7),
+                    new Person(8),
+                    new Person(9),
+                    new Person(10),
+                    new Person(11),
+                    new Person(12),
+                    new Person(13),
+                },
+                "insert in order",
+                5
+            };
+
             yield return new object[]
             {
                 new List<Person>()
@@ -27,7 +52,8 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(20),
                     new Person(16),
                 },
-                "Insert right of the parrentRoot and root with +2 and it's right child is have -1"
+                "Insert right of the parrentRoot and root with +2 and it's right child is have -1",
+                1
             };
 
             yield return new object[]
@@ -40,7 +66,8 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(20),
                     new Person(16),
                 },
-                "Insert left of the parrentRoot and root with +2 and it's right child is have -1"
+                "Insert left of the parrentRoot and root with +2 and it's right child is have -1",
+                2
             };
 
             yield return new object[]
@@ -53,7 +80,8 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(35),
                     new Person(40),
                 },
-                "Insert right of the parrentRoot and root with +2 and it's right child is have +1"
+                "Insert right of the parrentRoot and root with +2 and it's right child is have +1",
+                3
 
             };
 
@@ -68,14 +96,16 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(35),
                     new Person(40),
                 },
-                "Insert left of the parrentRoot and root with +2 and it's right child is have +1"
+                "Insert left of the parrentRoot and root with +2 and it's right child is have +1",
+                4
 
             };
+
         }
 
         [Theory]
         [MemberData(nameof(GetTestData))]
-        public void Insert_And_Test_Weight_And_BST(IList<Person> persons, string caseName)
+        public void Insert_And_Test_Weight_And_BST(IList<Person> persons, string caseName, int caseNumber)
         {
             Console.WriteLine($"Test case {caseName} is runnign");
             var avlTree = new AVLTree<Person>(person => person.Age);            
