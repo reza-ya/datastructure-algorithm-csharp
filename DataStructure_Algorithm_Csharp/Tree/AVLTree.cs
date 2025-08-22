@@ -332,26 +332,26 @@ namespace DataStructure_Algorithm_Csharp.Tree
             return continueToUpdate;
 
         }
-        public class Node<NT>
-        {
-            public Node(NT data, int value ,int weight, Node<NT>? left = null, Node<NT>? right = null)
-            {
-                Weight = weight;
-                Left = left;
-                Right = right;
-                Data.Add(data);
-                Value = value;
-            }
-            public int Weight { get; set; }
-            public Node<NT>? Left { get; set; }
-            public Node<NT>? Right { get; set; }
-            public int Value { get; set; }
-            public List<NT> Data { get; init; } = new();
-        }
+
 
     }
 
-
+    public class Node<NT>
+    {
+        public Node(NT data, int value, int weight, Node<NT>? left = null, Node<NT>? right = null)
+        {
+            Weight = weight;
+            Left = left;
+            Right = right;
+            Data.Add(data);
+            Value = value;
+        }
+        public int Weight { get; set; }
+        public Node<NT>? Left { get; set; }
+        public Node<NT>? Right { get; set; }
+        public int Value { get; set; }
+        public List<NT> Data { get; init; } = new();
+    }
 
 
 

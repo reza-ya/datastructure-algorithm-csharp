@@ -1,4 +1,4 @@
-﻿using DataStructure_Algorithm_Csharp.Storage;
+﻿using DataStructure_Algorithm_Csharp.Models;
 using DataStructure_Algorithm_Csharp.Tree;
 
 using System.Runtime.CompilerServices;
@@ -31,19 +31,6 @@ namespace DataStructure_Algorithm_Csharp
                 Console.WriteLine($"Found {persons.Count} person with the age {findAge}");
             }
             Console.WriteLine("Hello, World!");
-        }
-        public class Person
-        {
-            public Person(int age)
-            {
-                Age = age;
-                Id = 1;
-                FullName = "Reza Yari";
-            }
-            public int Id { get; set; }
-            public string FullName { get; set; }
-            public int Age { get; set; }
-
         }
     }
 }
