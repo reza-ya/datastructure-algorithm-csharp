@@ -14,23 +14,93 @@ namespace DataStrutureAlgorithm.Test.Tree
 
     public class AvlTreeTest
     {
-        [Fact]
-        public void Insert_LeftParrentRoot_Root_Pluse2_Right_Minus()
+
+        public static IEnumerable<object[]> GetTestData()
         {
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(10),
+                    new Person(5),
+                    new Person(15),
+                    new Person(20),
+                    new Person(16),
+                },
+                "Insert right of the parrentRoot and root with +2 and it's right child is have -1"
+            };
 
-            var avlTree = new AVLTree<Person>(person => person.Age);
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(40),
+                    new Person(45),
+                    new Person(15),
+                    new Person(20),
+                    new Person(16),
+                },
+                "Insert left of the parrentRoot and root with +2 and it's right child is have -1"
+            };
+
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(20),
+                    new Person(10),
+                    new Person(25),
+                    new Person(35),
+                    new Person(40),
+                },
+                "Insert right of the parrentRoot and root with +2 and it's right child is have +1"
+
+            };
 
 
-            avlTree.Add(new Person(10));
-            avlTree.Add(new Person(5));
-            avlTree.Add(new Person(15));
-            avlTree.Add(new Person(20));
-            avlTree.Add(new Person(16));
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(20),
+                    new Person(10),
+                    new Person(25),
+                    new Person(35),
+                    new Person(40),
+                },
+                "Insert left of the parrentRoot and root with +2 and it's right child is have +1"
 
-            Assert.True(CheckBST(avlTree));
-            Assert.True(CheckAvlTreeWeightBalance(avlTree));
-
+            };
         }
+
+        [Theory]
+        [MemberData(nameof(GetTestData))]
+        public void Insert_And_Test_Weight_And_BST(IList<Person> persons, string caseName)
+        {
+            Console.WriteLine($"Test case {caseName} is runnign");
+            var avlTree = new AVLTree<Person>(person => person.Age);            
+            foreach(var person in persons)
+            {
+                avlTree.Add(person);
+            }
+
+            var isBST = CheckBST(avlTree);
+            if (isBST == false)
+            {
+                Console.WriteLine($"Test case {caseName} failed BST");
+            }
+            var isWeightAndBalance = CheckAvlTreeWeightBalance(avlTree);
+            if (isWeightAndBalance== false)
+            {
+                Console.WriteLine($"Test case {caseName} failed weight-balance");
+            }
+
+            Assert.True(isBST, "BST Failed");
+            Assert.True(isWeightAndBalance, "Weight-Balance Failed");
+        }
+
+
+
 
         public static bool CheckAvlTreeWeightBalance<T>(AVLTree<T> avlTree)
         {
@@ -186,37 +256,6 @@ namespace DataStrutureAlgorithm.Test.Tree
             return maxHeight;
         }
 
-
-
-
-
-        //public static IEnumerable<object[]> GetTestData()
-        //{
-        //    yield return new object[]
-        //    {
-        //        new Person(10),
-        //        new Person(5),
-        //        new Person(15),
-        //        new Person(20),
-        //        new Person(16),
-        //    };
-        //}
-
-        //[Theory]
-        //[MemberData(nameof(GetTestData))]
-        //public void Insert_AvlTree_StayBalance(Person[] persons)
-        //{
-        //    var avlTree = new AVLTree<Person>(person => person.Age);
-
-        //    foreach(var person in persons)
-        //    {
-        //        avlTree.Add(person);
-        //    }
-
-
-        //    Assert.True(CheckBST(avlTree));
-        //    Assert.True(CheckAvlTreeWeightBalance(avlTree));
-        //}
     }
 
     public class HeightAccmulate<T>
