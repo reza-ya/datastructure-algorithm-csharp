@@ -35,6 +35,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
             if (_root == null)
             {
                 var newNode = new Node<T>(data, _selector(data), 0);
+                newNode.IsGlobalRoot = true;
                 _root = newNode;
                 return;
             }
@@ -166,7 +167,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
 
             // parrentRoot is globalRoot
-            if (parrentRoot.Weight == 2)
+            if (parrentRoot.Weight == 2 && parrentRoot.IsGlobalRoot)
             {
                 var root = parrentRoot;
                 if (root.Right == null) throw new InvalidOperationException("weight 2 has no right!");
@@ -174,6 +175,8 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 {
                     var pivot = root.Right;
                     _root = pivot;
+                    root.IsGlobalRoot = false;
+                    pivot.IsGlobalRoot = true;
                     RotateLeft(root, pivot);
                 }
                 else
@@ -183,18 +186,24 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     root.Right = root.Right.Left;
                     RotateRight(firstRoot, firstPivot);
                     _root = root.Right;
+
+                    root.IsGlobalRoot = false;
+                    root.Right.IsGlobalRoot = true;
                     RotateLeft(root, root.Right);
                 }
                 return true;
 
             }
-            else if (parrentRoot.Weight == -2)
+            else if (parrentRoot.Weight == -2 && parrentRoot.IsGlobalRoot)
             {
                 var root = parrentRoot;
                 if (root.Left == null) throw new InvalidOperationException("weight 2 has no right!");
                 if (root.Left.Weight == -1)
                 {
                     var pivot = root.Left;
+                    root.IsGlobalRoot = false;
+                    pivot.IsGlobalRoot = true;
+                    _root = pivot;
                     RotateRight(root, pivot);
                 }
                 else
@@ -202,6 +211,9 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     var firstRoot = root.Left;
                     var firstPivot = root.Left.Right;
                     RotateLeft(firstRoot, firstPivot);
+                    _root = root.Right;
+                    root.IsGlobalRoot = false;
+                    root.Right.IsGlobalRoot = true;
                     RotateRight(root, root.Left);
                 }
                 return true;
@@ -339,6 +351,13 @@ namespace DataStructure_Algorithm_Csharp.Tree
             {
                 return continueToUpdate;
             }
+
+            bool isRotate = RotateIfNeeded(root);
+            if (isRotate)
+            {
+                return false;
+            }
+
             // coming from right
             if (insertDirection > 0)
             {
@@ -366,11 +385,15 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
             }
 
-            bool isRotate = RotateIfNeeded(root);
-            if (isRotate)
+            if (root.IsGlobalRoot == true)
             {
-                return false;
+                bool RootIsRotate = RotateIfNeeded(root);
+                if (RootIsRotate)
+                {
+                    return false;
+                }
             }
+
             return continueToUpdate;
 
         }
@@ -388,6 +411,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
             Data.Add(data);
             Value = value;
         }
+        public bool IsGlobalRoot { get; set; } = false;
         public int Weight { get; set; }
         public Node<NT>? Left { get; set; }
         public Node<NT>? Right { get; set; }
