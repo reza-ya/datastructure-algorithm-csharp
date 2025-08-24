@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,9 +18,18 @@ namespace DataStrutureAlgorithm.Test.Tree
 
         public static IEnumerable<object[]> GetTestData()
         {
+            var data = new List<Person>(524288);
+            for (int i = 1; i <= 524287; i++)
+            {
+                data.Add(new Person(i));
+            }
+            yield return new object[]
+            {
+                data,
+                "insert 524,287 item in order",
+                524287
+            };
 
-            //TODO: this is failed but test case does not show it? add node count to the test case
-            //consider adding the exact shape of the tree for testing 
             yield return new object[]
             {
                 new List<Person>()
@@ -39,7 +49,7 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(13),
                 },
                 "insert in order",
-                5
+                13
             };
 
             yield return new object[]
@@ -53,7 +63,7 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(16),
                 },
                 "Insert right of the parrentRoot and root with +2 and it's right child is have -1",
-                1
+                5
             };
 
             yield return new object[]
@@ -67,7 +77,7 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(16),
                 },
                 "Insert left of the parrentRoot and root with +2 and it's right child is have -1",
-                2
+                5
             };
 
             yield return new object[]
@@ -81,7 +91,7 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(40),
                 },
                 "Insert right of the parrentRoot and root with +2 and it's right child is have +1",
-                3
+                5
 
             };
 
@@ -97,7 +107,7 @@ namespace DataStrutureAlgorithm.Test.Tree
                     new Person(40),
                 },
                 "Insert left of the parrentRoot and root with +2 and it's right child is have +1",
-                4
+                5
 
             };
 
@@ -105,28 +115,31 @@ namespace DataStrutureAlgorithm.Test.Tree
 
         [Theory]
         [MemberData(nameof(GetTestData))]
-        public void Insert_And_Test_Weight_And_BST(IList<Person> persons, string caseName, int caseNumber)
+        public void Insert_And_Test_Weight_And_BST(IList<Person> persons, string caseName, int count)
         {
             Console.WriteLine($"Test case {caseName} is runnign");
-            var avlTree = new AVLTree<Person>(person => person.Age);            
+            var avlTree = new AVLTree<Person>(person => person.Age);     
+            
             foreach(var person in persons)
             {
                 avlTree.Add(person);
             }
 
-            var isBST = CheckBST(avlTree);
-            if (isBST == false)
+            if (avlTree.Root != null)
             {
-                Console.WriteLine($"Test case {caseName} failed BST");
+                int treeHeight = BF(avlTree.Root);
+                Console.WriteLine($"TestCase: {caseName}, Tree Height: {treeHeight}");
             }
-            var isWeightAndBalance = CheckAvlTreeWeightBalance(avlTree);
-            if (isWeightAndBalance== false)
-            {
-                Console.WriteLine($"Test case {caseName} failed weight-balance");
-            }
+
+
+
+            bool isBST = CheckBST(avlTree);
+            bool isWeightAndBalance = CheckAvlTreeWeightBalance(avlTree);
+            int treeCount = CountTree(avlTree);
 
             Assert.True(isBST, "BST Failed");
             Assert.True(isWeightAndBalance, "Weight-Balance Failed");
+            Assert.Equal(count, treeCount);
         }
 
 
@@ -134,7 +147,7 @@ namespace DataStrutureAlgorithm.Test.Tree
 
         public static bool CheckAvlTreeWeightBalance<T>(AVLTree<T> avlTree)
         {
-            var root = avlTree._root;
+            var root = avlTree.Root;
             var result = true;
             if (root == null) return true;
 
@@ -176,7 +189,7 @@ namespace DataStrutureAlgorithm.Test.Tree
         public static bool CheckBST<T>(AVLTree<T> avlTree)
         {
             var result = true;
-            var root = avlTree._root;
+            var root = avlTree.Root;
             if (root == null) return true;
 
             var stack = new Stack<Node<T>>();
@@ -213,7 +226,33 @@ namespace DataStrutureAlgorithm.Test.Tree
             return result;
         }
 
+        public static int CountTree<T>(AVLTree<T> avlTree)
+        {
+            var root = avlTree.Root;
+            if (root == null) return 0;
 
+            var stack = new Stack<Node<T>>();
+            stack.Push(root);
+
+            int counter = 0;
+            while (stack.Count != 0)
+            {
+                counter++;
+                var currentNode = stack.Pop();
+
+                if (currentNode.Left != null)
+                {
+                    
+                    stack.Push(currentNode.Left);
+                }
+                if (currentNode.Right != null)
+                {
+                    
+                    stack.Push(currentNode.Right);
+                }
+            }
+            return counter;
+        }
 
 
 

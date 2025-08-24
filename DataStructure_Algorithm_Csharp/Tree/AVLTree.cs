@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design.Serialization;
@@ -21,10 +22,13 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
     public class AVLTree<T>
     {
-        public Node<T>? _root;
+        public Node<T>? Root;
         public int _count = 0;
         public int _maxHeigth = 0;
         public Func<T, int> _selector;
+        public Stack<T> stack = new Stack<T>();
+
+
         public AVLTree(Func<T, int> selector)
         {
             _selector = selector;
@@ -32,25 +36,28 @@ namespace DataStructure_Algorithm_Csharp.Tree
         public void Add(T data)
         {
             _count++;
-            if (_root == null)
+            if (Root == null)
             {
                 var newNode = new Node<T>(data, _selector(data), 0);
                 newNode.IsGlobalRoot = true;
-                _root = newNode;
+                Root = newNode;
                 return;
             }
 
 
-            InsertNode(_root, data);
+            InsertNode(Root, data);
         }
+        public void Remove(Predicate<T> predicate)
+        {
 
+        }
         public List<T>? Find(int value)
         {
-            if (_root == null)
+            if (Root == null)
             {
                 return null;
             }
-            var currentNode = _root;
+            var currentNode = Root;
             while(currentNode != null && currentNode.Value != value)
             {
                 if (value > currentNode.Value)
@@ -73,10 +80,10 @@ namespace DataStructure_Algorithm_Csharp.Tree
         {
             return _count;
         }
-        private void UpdateWeightBackTracking(Node<T> leaf)
-        {
-           
-        }
+
+
+
+
         /// <summary>
         /// do a tree rotation and updates it's weight accordingly 
         /// update of root parrent must be done outside this function!
@@ -156,7 +163,6 @@ namespace DataStructure_Algorithm_Csharp.Tree
             pivot.Left = root;
             root.Right = pivotChild;
         }
-        
         private bool RotateIfNeeded(Node<T> parrentRoot)
         {
             bool isRotate = false;
@@ -174,7 +180,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 if (root.Right.Weight == 1)
                 {
                     var pivot = root.Right;
-                    _root = pivot;
+                    Root = pivot;
                     root.IsGlobalRoot = false;
                     pivot.IsGlobalRoot = true;
                     RotateLeft(root, pivot);
@@ -185,7 +191,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     var firstPivot = root.Right.Left;
                     root.Right = root.Right.Left;
                     RotateRight(firstRoot, firstPivot);
-                    _root = root.Right;
+                    Root = root.Right;
 
                     root.IsGlobalRoot = false;
                     root.Right.IsGlobalRoot = true;
@@ -203,7 +209,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     var pivot = root.Left;
                     root.IsGlobalRoot = false;
                     pivot.IsGlobalRoot = true;
-                    _root = pivot;
+                    Root = pivot;
                     RotateRight(root, pivot);
                 }
                 else
@@ -211,7 +217,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     var firstRoot = root.Left;
                     var firstPivot = root.Left.Right;
                     RotateLeft(firstRoot, firstPivot);
-                    _root = root.Right;
+                    Root = root.Right;
                     root.IsGlobalRoot = false;
                     root.Right.IsGlobalRoot = true;
                     RotateRight(root, root.Left);
@@ -398,7 +404,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
         }
 
-
+     
     }
 
     public class Node<NT>

@@ -28,6 +28,9 @@ namespace DataStructure_Algorithm_Csharp
             {
                 Console.WriteLine($"Found {persons.Count} person with the age {findAge}");
             }
+
+
+            avlTree.Remove(person => person.Age == 10);
             Console.WriteLine("Hello, World!");
         }
     }
