@@ -47,7 +47,70 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
             InsertNode(Root, data);
         }
-        public void Remove(Predicate<T> predicate)
+        public void Remove(int value)
+        {
+
+            
+            var stackTrace = new Stack<Node<T>>();
+            
+            Node<T>? currentNode = Root;
+            if (currentNode == null)
+            {
+                throw new KeyNotFoundException();
+            }
+            stackTrace.Push(currentNode);
+
+            while(currentNode != null)
+            {
+                if (currentNode?.Value ==  value)
+                {
+                    // delete node
+                    DeleteNodeWithUpdatedWeight(currentNode, stackTrace);
+
+                }
+                if (value > currentNode?.Value)
+                {
+                    if (currentNode.Right == null)
+                    {
+                        throw new KeyNotFoundException();
+                    }
+                    else
+                    {
+                        currentNode = currentNode.Right;
+                        stackTrace.Push(currentNode);
+                    }
+                }
+                else if (value < currentNode?.Value)
+                {
+                    if (currentNode.Left == null)
+                    {
+                        throw new KeyNotFoundException();
+                    }
+                    else
+                    {
+                        currentNode = currentNode.Left;
+                        stackTrace.Push(currentNode);
+                    }
+                }
+            }
+
+            if (currentNode == null)
+            {
+                throw new KeyNotFoundException();
+            }
+
+        }
+
+        public void DeleteNodeWithUpdatedWeight(Node<T> node, Stack<Node<T>> stackTrace)
+        {
+            if (node.Right == null && node.Left == null)
+            {
+                var parrent = stackTrace.Pop();
+            }
+        }
+
+
+        public void UpdateWeightBacktracking(Stack<Node<T>> stackTrace)
         {
 
         }
