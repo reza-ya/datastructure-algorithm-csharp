@@ -51,14 +51,14 @@ namespace DataStructure_Algorithm_Csharp.Tree
         {
 
             
-            var stackTrace = new Stack<Node<T>>();
+            var stackTrace = new Stack<StackTraceItem<Node<T>>>();
             
             Node<T>? currentNode = Root;
             if (currentNode == null)
             {
                 throw new KeyNotFoundException();
             }
-            stackTrace.Push(currentNode);
+            //stackTrace.Push(currentNode);
 
             while(currentNode != null)
             {
@@ -77,7 +77,8 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     else
                     {
                         currentNode = currentNode.Right;
-                        stackTrace.Push(currentNode);
+                        var stackTraceItem = new StackTraceItem<Node<T>>(currentNode, Direction.Right);
+                        stackTrace.Push(stackTraceItem);
                     }
                 }
                 else if (value < currentNode?.Value)
@@ -89,7 +90,8 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     else
                     {
                         currentNode = currentNode.Left;
-                        stackTrace.Push(currentNode);
+                        var stackTraceItem = new StackTraceItem<Node<T>>(currentNode, Direction.Left);
+                        stackTrace.Push(stackTraceItem);
                     }
                 }
             }
@@ -101,18 +103,45 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
         }
 
-        public void DeleteNodeWithUpdatedWeight(Node<T> node, Stack<Node<T>> stackTrace)
+        public void DeleteNodeWithUpdatedWeight(Node<T> node, Stack<StackTraceItem<Node<T>>> stackTrace)
         {
+            // if removal node is a leaf
             if (node.Right == null && node.Left == null)
             {
+                int numberOfData = node.Data.Count;
+                if (stackTrace.Count == 0)
+                {
+                    throw new Exception("There must be some parrent");
+                }
+                UpdateWeightBacktracking(stackTrace);
                 var parrent = stackTrace.Pop();
+                RemoveLeaf(parrent);
+                _count = _count - numberOfData;
+                return;
             }
+
         }
 
-
-        public void UpdateWeightBacktracking(Stack<Node<T>> stackTrace)
+        // TODO: implement this method
+        public void UpdateWeightBacktracking(Stack<StackTraceItem<Node<T>>> stackTrace)
         {
 
+        }
+
+        private void RemoveLeaf(StackTraceItem<Node<T>> parrentItem)
+        {
+            if (parrentItem.Direction == Direction.Left)
+            {
+                parrentItem.Node.Left = null;
+            }
+            else if (parrentItem.Direction == Direction.Right)
+            {
+                parrentItem.Node.Right = null;
+            }
+            else
+            {
+                throw new Exception("Direction value must be one of these two: Right, Left");
+            }
         }
         public List<T>? Find(int value)
         {
@@ -468,6 +497,23 @@ namespace DataStructure_Algorithm_Csharp.Tree
         }
 
      
+    }
+
+    public class StackTraceItem<T>
+    {
+        public StackTraceItem(T node, Direction direction)
+        {
+            Node = node;
+            Direction = direction;
+        }
+        public T Node { get; set; }
+        public Direction Direction { get; set; }
+    }
+
+    public enum Direction
+    {
+        Left = -1,
+        Right = 1
     }
 
     public class Node<NT>
