@@ -113,30 +113,89 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 {
                     throw new Exception("There must be some parrent");
                 }
-                UpdateWeightBacktracking(stackTrace);
                 var parrent = stackTrace.Pop();
-                RemoveLeaf(parrent);
+                Direction deleteDirection = RemoveLeaf(parrent);
+                UpdateWeightAndRotateBacktracking(stackTrace, deleteDirection);
                 _count = _count - numberOfData;
                 return;
+            }
+            else if (node.Right == null && node.Left != null)
+            {
+
+            }
+            else if (node.Right != null && node.Left == null)
+            {
+
+            }
+            else if (node.Right != null && node.Left != null)
+            {
+
+            }
+            else
+            {
+                throw new Exception("Impossible node!!!");
             }
 
         }
 
-        // TODO: implement this method
-        public void UpdateWeightBacktracking(Stack<StackTraceItem<Node<T>>> stackTrace)
+        public void UpdateWeightAndRotateBacktracking(Stack<StackTraceItem<Node<T>>> stackTrace, Direction deleteDirection)
         {
+            bool keepGoing = true;
+            Direction currentDirection = deleteDirection;
+            StackTraceItem<Node<T>> currentStackItem = stackTrace.Pop();
+            while(keepGoing || stackTrace.Count == 0)
+            {
+                if (currentDirection == Direction.Right)
+                {
+                    if (currentStackItem.Node.Weight >= 0)
+                    {
+                        currentStackItem.Node.Weight--;
+                        keepGoing = false;
+                        break;
+                    }
+                    else
+                    {
+                        currentStackItem.Node.Weight--;
+                    }
+                }
+                // coming from left
+                else if (currentDirection == Direction.Left)
+                {
+                    if (currentStackItem.Node.Weight <= 0)
+                    {
+                        currentStackItem.Node.Weight++;
+                        keepGoing = false;
+                        break;
+                    }
+                    else
+                    {
+                        currentStackItem.Node.Weight++;
+                    }
+                }
+                currentDirection = currentStackItem.Direction;
+                currentStackItem = stackTrace.Pop();
+                bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                if (isRotate)
+                {
+                    keepGoing = false;
+                    break;
+                }
 
+            }
         }
 
-        private void RemoveLeaf(StackTraceItem<Node<T>> parrentItem)
+
+        private Direction RemoveLeaf(StackTraceItem<Node<T>> parrentItem)
         {
             if (parrentItem.Direction == Direction.Left)
             {
                 parrentItem.Node.Left = null;
+                return Direction.Left;
             }
             else if (parrentItem.Direction == Direction.Right)
             {
                 parrentItem.Node.Right = null;
+                return Direction.Right;
             }
             else
             {
