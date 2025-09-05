@@ -66,6 +66,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 {
                     // delete node
                     DeleteNodeWithUpdatedWeight(currentNode, stackTrace);
+                    break;
 
                 }
                 if (value > currentNode?.Value)
@@ -76,9 +77,9 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     }
                     else
                     {
-                        currentNode = currentNode.Right;
                         var stackTraceItem = new StackTraceItem<Node<T>>(currentNode, Direction.Right);
                         stackTrace.Push(stackTraceItem);
+                        currentNode = currentNode.Right;
                     }
                 }
                 else if (value < currentNode?.Value)
@@ -89,9 +90,9 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     }
                     else
                     {
-                        currentNode = currentNode.Left;
                         var stackTraceItem = new StackTraceItem<Node<T>>(currentNode, Direction.Left);
                         stackTrace.Push(stackTraceItem);
+                        currentNode = currentNode.Left;
                     }
                 }
             }
@@ -115,21 +116,85 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
                 var parrent = stackTrace.Pop();
                 Direction deleteDirection = RemoveLeaf(parrent);
-                UpdateWeightAndRotateBacktracking(stackTrace, deleteDirection);
+                UpdateWeightAndRotateBacktracking(stackTrace);
                 _count = _count - numberOfData;
                 return;
             }
             else if (node.Right == null && node.Left != null)
             {
+                var parrentItem = stackTrace.Peek();
+                if (parrentItem.Direction == Direction.Right)
+                {
+                    parrentItem.Node.Right = node.Left;
+                    UpdateWeightAndRotateBacktracking(stackTrace);
+                }
+                else if (parrentItem.Direction == Direction.Left)
+                {
+                    parrentItem.Node.Left = node.Left;
+                    UpdateWeightAndRotateBacktracking(stackTrace);
+                }
+                else
+                {
+                    throw new Exception("Direction must be Left or Right");
+                }
 
             }
             else if (node.Right != null && node.Left == null)
             {
+                var parrentItem = stackTrace.Peek();
+                if (parrentItem.Direction == Direction.Right)
+                {
+                    parrentItem.Node.Right = node.Right;
+                    UpdateWeightAndRotateBacktracking(stackTrace);
+                }
+                else if (parrentItem.Direction == Direction.Left)
+                {
+                    parrentItem.Node.Left = node.Right;
+                    UpdateWeightAndRotateBacktracking(stackTrace);
+                }
+                else
+                {
+                    throw new Exception("Direction must be Left or Right");
+                }
 
             }
             else if (node.Right != null && node.Left != null)
             {
+                var secondStackTrace = new List<StackTraceItem<Node<T>>>();
+                var preSuccessorNode = FindPreSuccessorNode(node, ref secondStackTrace);
+                if (preSuccessorNode == null)
+                {
+                    throw new Exception("Pre Successor cannot be null");
+                }
 
+                var parrentItem = stackTrace.Pop();
+                if (parrentItem.Direction == Direction.Left)
+                {
+                    parrentItem.Node.Left = preSuccessorNode;
+                    preSuccessorNode.Left = node.Left;
+                    preSuccessorNode.Right = node.Right;
+                    preSuccessorNode.Weight = node.Weight;
+                }
+                else if (parrentItem.Direction == Direction.Right)
+                {
+                    parrentItem.Node.Right = preSuccessorNode;
+                    preSuccessorNode.Left = node.Left;
+                    preSuccessorNode.Right = node.Right;
+                    preSuccessorNode.Weight = node.Weight;
+                }
+                else
+                {
+                    throw new Exception("Direction must be Left or Right");
+                }
+
+                stackTrace.Push(parrentItem);
+                stackTrace.Push(new StackTraceItem<Node<T>>(preSuccessorNode, Direction.Left));
+                foreach(var item in secondStackTrace)
+                {
+                    stackTrace.Push(item);
+                }
+
+                UpdateWeightAndRotateBacktracking(stackTrace);
             }
             else
             {
@@ -138,24 +203,51 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
         }
 
-        public void UpdateWeightAndRotateBacktracking(Stack<StackTraceItem<Node<T>>> stackTrace, Direction deleteDirection)
+        private Node<T> FindPreSuccessorNode(Node<T> node, ref List<StackTraceItem<Node<T>>> stackTrace)
+        {
+            var currentNode = node.Left;
+            while(currentNode != null)
+            {
+                if (currentNode.Right != null)
+                {
+                    stackTrace.Add(new StackTraceItem<Node<T>>(currentNode, Direction.Right));
+                    currentNode = currentNode.Right;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (currentNode == null)
+            {
+                throw new Exception("Current Node is null unexpectecly");
+            }
+            if (stackTrace.Count != 0)
+            {
+                var lastItem = stackTrace.Last();
+                lastItem.Node.Right = null;
+            }
+            return currentNode;
+        }
+
+        public void UpdateWeightAndRotateBacktracking(Stack<StackTraceItem<Node<T>>> stackTrace)
         {
             bool keepGoing = true;
-            Direction currentDirection = deleteDirection;
             StackTraceItem<Node<T>> currentStackItem = stackTrace.Pop();
-            while(keepGoing || stackTrace.Count == 0)
+            Direction currentDirection = currentStackItem.Direction;
+            while(keepGoing)
             {
                 if (currentDirection == Direction.Right)
                 {
                     if (currentStackItem.Node.Weight >= 0)
                     {
                         currentStackItem.Node.Weight--;
-                        keepGoing = false;
-                        break;
                     }
                     else
                     {
                         currentStackItem.Node.Weight--;
+                        keepGoing = false;
+                        break;
                     }
                 }
                 // coming from left
@@ -164,22 +256,31 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     if (currentStackItem.Node.Weight <= 0)
                     {
                         currentStackItem.Node.Weight++;
-                        keepGoing = false;
-                        break;
                     }
                     else
                     {
                         currentStackItem.Node.Weight++;
+                        keepGoing = false;
+                        break;
                     }
                 }
-                currentDirection = currentStackItem.Direction;
-                currentStackItem = stackTrace.Pop();
-                bool isRotate = RotateIfNeeded(currentStackItem.Node);
-                if (isRotate)
+                if (stackTrace.Count != 0)
+                {
+                    currentStackItem = stackTrace.Pop();
+                    currentDirection = currentStackItem.Direction;
+                    bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                    if (isRotate)
+                    {
+                        keepGoing = false;
+                        break;
+                    }
+                }
+                else
                 {
                     keepGoing = false;
                     break;
                 }
+                
 
             }
         }

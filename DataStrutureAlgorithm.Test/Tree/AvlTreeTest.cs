@@ -16,8 +16,128 @@ namespace DataStrutureAlgorithm.Test.Tree
     public class AvlTreeTest
     {
 
+        public static IEnumerable<object[]> GetRemoveTestDate()
+        {
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(50),
+                    new Person(25),
+                    new Person(100),
+                    new Person(15),
+                    new Person(45),
+                    new Person(75),
+                    new Person(125),
+                    new Person(10),
+                    new Person(20),
+                    new Person(40),
+                    new Person(47),
+                    new Person(70),
+                    new Person(80),
+                    new Person(120),
+                    new Person(135),
+                },
+                "remove 15",
+                14,
+                new List<int>() // remove values
+                {
+                    100
+                }
+            };
+
+
+
+
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(10),
+                    new Person(5),
+                    new Person(20),
+                    new Person(2),
+                    new Person(7),
+                    new Person(15),
+                    new Person(25),
+                    new Person(12),
+                },
+                "remove 15",
+                7,
+                new List<int>() // remove values
+                {
+                    15
+                }
+            };
+
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(10),
+                    new Person(5),
+                    new Person(20),
+                    new Person(2),
+                    new Person(7),
+                    new Person(15),
+                    new Person(25),
+                    new Person(17),
+                },
+                "insert in order",
+                7,
+                new List<int>() // remove values
+                {
+                    15
+                }
+            };
+
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(1),
+                    new Person(2),
+                    new Person(3),
+                    new Person(4),
+                    new Person(5),
+                    new Person(6),
+                    new Person(8),
+                    new Person(7),
+                },
+                "insert in order",
+                7,
+                new List<int>() // remove values
+                {
+                    8
+                }
+            };
+
+            yield return new object[]
+            {
+                new List<Person>()
+                {
+                    new Person(1),
+                    new Person(2),
+                    new Person(3),
+                    new Person(4),
+                    new Person(5),
+                    new Person(6),
+                    new Person(7),
+                    new Person(8),
+                },
+                "insert in order",
+                7,
+                new List<int>() // remove values
+                {
+                    7
+                }
+            };
+        }
+
         public static IEnumerable<object[]> GetTestData()
         {
+ 
+
             var data = new List<Person>(524288);
             for (int i = 1; i <= 524287; i++)
             {
@@ -143,6 +263,39 @@ namespace DataStrutureAlgorithm.Test.Tree
         }
 
 
+        [Theory]
+        [MemberData(nameof(GetRemoveTestDate))]
+        public void Insert_And_Remove_Test_Weight_And_BST(IList<Person> persons, string caseName, int count, IList<int> removeItems)
+        {
+            Console.WriteLine($"Test case {caseName} is runnign");
+            var avlTree = new AVLTree<Person>(person => person.Age);
+
+            foreach (var person in persons)
+            {
+                avlTree.Add(person);
+            }
+
+            foreach(var removeItem in removeItems)
+            {
+                avlTree.Remove(removeItem);
+            }
+
+            if (avlTree.Root != null)
+            {
+                int treeHeight = BF(avlTree.Root);
+                Console.WriteLine($"TestCase: {caseName}, Tree Height: {treeHeight}");
+            }
+
+
+
+            bool isBST = CheckBST(avlTree);
+            bool isWeightAndBalance = CheckAvlTreeWeightBalance(avlTree);
+            int treeCount = CountTree(avlTree);
+
+            Assert.True(isBST, "BST Failed");
+            Assert.True(isWeightAndBalance, "Weight-Balance Failed");
+            Assert.Equal(count, treeCount);
+        }
 
 
         public static bool CheckAvlTreeWeightBalance<T>(AVLTree<T> avlTree)
