@@ -18,6 +18,37 @@ namespace DataStrutureAlgorithm.Test.Tree
 
         public static IEnumerable<object[]> GetRemoveTestDate()
         {
+
+            yield return new object[]
+{
+                new List<Person>()
+                {
+                    new Person(50),
+                    new Person(25),
+                    new Person(100),
+                    new Person(15),
+                    new Person(45),
+                    new Person(75),
+                    new Person(125),
+                    new Person(10),
+                    new Person(20),
+                    new Person(40),
+                    new Person(47),
+                    new Person(70),
+                    new Person(80),
+                    new Person(120),
+                    new Person(135),
+                    new Person(69),
+                },
+                "remove 15",
+                15,
+                new List<int>() // remove values
+                {
+                    100
+                }
+};
+
+
             yield return new object[]
             {
                 new List<Person>()
@@ -438,8 +469,12 @@ namespace DataStrutureAlgorithm.Test.Tree
 
             return result;
         }        
-        private static int BF<T>(Node<T> root)
+        private static int BF<T>(Node<T>? root)
         {
+            if (root == null)
+            {
+                return 0;
+            }
             if (root.Left == null && root.Right == null)
             {
                 return 1;

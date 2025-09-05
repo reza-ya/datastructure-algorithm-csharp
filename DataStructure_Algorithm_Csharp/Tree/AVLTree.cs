@@ -6,6 +6,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
@@ -195,6 +196,10 @@ namespace DataStructure_Algorithm_Csharp.Tree
                 }
 
                 UpdateWeightAndRotateBacktracking(stackTrace);
+                foreach(var stackItem in stackTrace)
+                {
+                    stackItem.Node.Weight = BF(stackItem.Node.Right) - BF(stackItem.Node.Left);
+                }
             }
             else
             {
@@ -239,28 +244,85 @@ namespace DataStructure_Algorithm_Csharp.Tree
             {
                 if (currentDirection == Direction.Right)
                 {
-                    if (currentStackItem.Node.Weight >= 0)
+                    if (currentStackItem.Node.Weight > 0)
                     {
                         currentStackItem.Node.Weight--;
+                    }
+                    else if (currentStackItem.Node.Weight == 0)
+                    {
+                        currentStackItem.Node.Weight--;
+                        keepGoing = false;
+                        if (stackTrace.Count != 0)
+                        {
+                            currentStackItem = stackTrace.Pop();
+                            currentDirection = currentStackItem.Direction;
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                            currentStackItem.Node.Weight = BF(currentStackItem.Node.Right) - BF(currentStackItem.Node.Left);
+                        }
+                        else
+                        {
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                        }
+                        break;
+
                     }
                     else
                     {
                         currentStackItem.Node.Weight--;
                         keepGoing = false;
+                        if (stackTrace.Count != 0)
+                        {
+                            currentStackItem = stackTrace.Pop();
+                            currentDirection = currentStackItem.Direction;
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                            currentStackItem.Node.Weight = BF(currentStackItem.Node.Right) - BF(currentStackItem.Node.Left);
+                        }
+                        else
+                        {
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                        }
                         break;
                     }
                 }
                 // coming from left
                 else if (currentDirection == Direction.Left)
                 {
-                    if (currentStackItem.Node.Weight <= 0)
+                    if (currentStackItem.Node.Weight < 0)
                     {
                         currentStackItem.Node.Weight++;
+                    }
+                    else if (currentStackItem.Node.Weight == 0)
+                    {
+                        currentStackItem.Node.Weight++;
+                        keepGoing = false;
+                        if (stackTrace.Count != 0)
+                        {
+                            currentStackItem = stackTrace.Pop();
+                            currentDirection = currentStackItem.Direction;
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                            currentStackItem.Node.Weight = BF(currentStackItem.Node.Right) - BF(currentStackItem.Node.Left);
+                        }
+                        else
+                        {
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                        }
+                        break;
                     }
                     else
                     {
                         currentStackItem.Node.Weight++;
                         keepGoing = false;
+                        if (stackTrace.Count != 0)
+                        {
+                            currentStackItem = stackTrace.Pop();
+                            currentDirection = currentStackItem.Direction;
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                            currentStackItem.Node.Weight = BF(currentStackItem.Node.Right) - BF(currentStackItem.Node.Left);
+                        }
+                        else
+                        {
+                            bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                        }
                         break;
                     }
                 }
@@ -269,6 +331,7 @@ namespace DataStructure_Algorithm_Csharp.Tree
                     currentStackItem = stackTrace.Pop();
                     currentDirection = currentStackItem.Direction;
                     bool isRotate = RotateIfNeeded(currentStackItem.Node);
+                    currentStackItem.Node.Weight = BF(currentStackItem.Node.Right) - BF(currentStackItem.Node.Left);
                     if (isRotate)
                     {
                         keepGoing = false;
@@ -656,9 +719,62 @@ namespace DataStructure_Algorithm_Csharp.Tree
 
         }
 
-     
+        private static int BF<T>(Node<T>? root)
+        {
+            if (root == null)
+            {
+                return 0;
+            }
+            if (root.Left == null && root.Right == null)
+            {
+                return 1;
+            }
+            var maxHeight = 1;
+            var stack = new Stack<HeightAccmulate<T>>();
+            var node = new HeightAccmulate<T>(root, 1);
+            stack.Push(node);
+
+            while (stack.Count != 0)
+            {
+                var currentNode = stack.Pop();
+
+                if (currentNode.TreeNode.Left == null && currentNode.TreeNode.Right == null)
+                {
+                    if (currentNode.Height > maxHeight)
+                    {
+                        maxHeight = currentNode.Height;
+                    }
+                }
+
+                if (currentNode.TreeNode.Left != null)
+                {
+                    var newHeight = currentNode.Height + 1;
+                    var newHeightAccumulate = new HeightAccmulate<T>(currentNode.TreeNode.Left, newHeight);
+                    stack.Push(newHeightAccumulate);
+                }
+                if (currentNode.TreeNode.Right != null)
+                {
+                    var newHeight = currentNode.Height + 1;
+                    var newHeightAccumulate = new HeightAccmulate<T>(currentNode.TreeNode.Right, newHeight);
+                    stack.Push(newHeightAccumulate);
+                }
+            }
+
+            return maxHeight;
+        }
+
     }
 
+    public class HeightAccmulate<T>
+    {
+        public HeightAccmulate(Node<T> node, int height)
+        {
+            TreeNode = node;
+            Height = height;
+        }
+        public Node<T> TreeNode { get; set; }
+        public int Height { get; set; }
+    }
     public class StackTraceItem<T>
     {
         public StackTraceItem(T node, Direction direction)
